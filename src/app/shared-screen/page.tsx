@@ -3,6 +3,12 @@ import { useEffect, useState } from "react";
 import { WebsocketProvider } from "y-websocket";
 import * as Y from 'yjs';
 
+// URL에서 classesId 가져오기
+function getClassesIdFromUrl(): string | null {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('classesId');
+}
+
 // 쿠키에서 값을 가져오는 함수
 function getCookie(name: string): string | null {
   const value = `; ${document.cookie}`;
@@ -19,12 +25,19 @@ export default function SharedScreen() {
     if (typeof window !== 'undefined') {
       const userType = getCookie('type');
       setIsMentor(userType === 'mentor');
-      const wsUrl = process.env.NEXT_PUBLIC_WSS_URL || "ws://127.0.0.1:8080";
+      const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://127.0.0.1:8080";
+      const classesId = getClassesIdFromUrl(); // classesId 추출
+      if (!classesId) {
+        setConnectionStatus('잘못된 classesId');
+        return;
+      }
+
       const ydoc = new Y.Doc();
       const yMap = ydoc.getMap('shared-form');
 
       const timeout = setTimeout(() => {
-        const wsProvider = new WebsocketProvider(wsUrl, '', ydoc, {
+        // classesId를 방 이름으로 사용
+        const wsProvider = new WebsocketProvider(wsUrl, classesId, ydoc, {
           WebSocketPolyfill: WebSocket,
         });
 
@@ -39,7 +52,6 @@ export default function SharedScreen() {
 
         const form = document.getElementById('shared-form');
         if (form) {
-          // 타입을 구체적으로 지정
           const formElements = form.querySelectorAll<
               HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
           >('input, textarea, select');
