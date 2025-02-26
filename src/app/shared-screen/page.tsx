@@ -25,7 +25,7 @@ export default function SharedScreen() {
     if (typeof window !== 'undefined') {
       const userType = getCookie('type');
       setIsMentor(userType === 'mentor');
-      const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://127.0.0.1:8080";
+      const wsUrl = process.env.NEXT_PUBLIC_WSS_URL || "ws://127.0.0.1:8080";
       const classesId = getClassesIdFromUrl(); // classesId 추출
       if (!classesId) {
         setConnectionStatus('잘못된 classesId');
